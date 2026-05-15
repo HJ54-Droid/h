@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>温馨胎动记录</title>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'PingFang SC','Microsoft YaHei',sans-serif}
+        body{
+            background:linear-gradient(135deg,#FFEEF4 0%,#FFF8FC 100%);
+            min-height:100vh;padding:12px 10px 70px;position:relative;overflow-x:hidden;
+            transition:background 1s ease;
+        }
+        body.night{
+            background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);
+        }
+
+        .control-bar{
+            position:fixed;bottom:15px;left:50%;transform:translateX(-50%);
+            display:flex;gap:8px;z-index:999;
+        }
+        .ctrl-btn{
+            padding:8px 12px;border-radius:20px;border:none;
+            background:#FF70A6;color:white;font-size:13px;font-weight:bold;
+            box-shadow:0 3px 8px rgba(0,0,0,0.15);
+        }
+
+        .sun{
+            position:fixed;top:25px;right:25px;width:50px;height:50px;
+            background:#ffd040;border-radius:50%;box-shadow:0 0 30px #ffd040;
+            animation:shine 3s infinite alternate;z-index:0;
+        }
+        @keyframes shine{0%{transform:scale(1);}100%{transform:scale(1.1);}}
+        .cloud{
+            position:fixed;background:#fff;border-radius:40px;z-index:0;
+            animation:cloudMove 25s infinite linear;opacity:0.8;
+        }
+        .cloud1{top:10%;left:-120px;width:130px;height:38px;}
+        .cloud2{top:22%;left:-180px;width:110px;height:34px;animation-delay:6s;}
+        @keyframes cloudMove{100%{transform:translateX(110vw);}}
+        .moon{
+            position:fixed;top:25px;right:25px;width:42px;height:42px;
+            background:#f6f6f6;border-radius:50%;box-shadow:0 0 25px #f6f6f6;
+            z-index:0;display:none;
+        }
+        .moon::after{
+            content:'';position:absolute;top:-5px;right:6px;width:35px;height:35px;
+            background:#16213e;border-radius:50%;
+        }
+        .star{
+            position:fixed;color:#fff;font-size:10px;
+            animation:blink 2s infinite alternate;z-index:0;
+        }
+        @keyframes blink{0%{opacity:0.2;}100%{opacity:1;}}
+
+        .baby-item{
+            position:fixed;font-size:24px;z-index:0;opacity:0.75;
+            animation:floatSlow 8s infinite ease-in-out;
+        }
+        .b1{top:22%;left:6%;}
+        .b2{top:68%;right:7%;}
+        .b3{top:42%;left:88%;}
+        .b4{top:82%;left:10%;}
+        @keyframes floatSlow{
+            0%,100%{transform:translateY(0);}
+            50%{transform:translateY(-20px);}
+        }
+
+        .box{
+            max-width:420px;margin:0 auto;background:#fff;border-radius:28px;
+            box-shadow:0 12px 32px rgba(255,148,191,.15);padding:24px;
+            position:relative;z-index:1;transition:background 0.6s, color 0.6s;
+        }
+        body.night .box{background:#2a2a42;color:#eee;}
+
+        .header{text-align:center;margin-bottom:16px}
+        .title{font-size:24px;color:#FF70A6;font-weight:bold}
+        .date{font-size:14px;color:#FF99BB;margin-top:4px}
+        body.night .title,body.night .date{color:#e0d8ff;}
+
+        .tutor-box{
+            background:#FFF5F9;border-radius:16px;padding:12px;margin:10px 0;
+            font-size:13px;line-height:1.5;color:#FF70A6;
+        }
+        body.night .tutor-box{background:#2e2e4a;color:#eee;}
+
+        .week-box{background:#FFF5F9;border-radius:16px;padding:12px;text-align:center;margin:10px 0}
+        body.night .week-box{background:#2e2e4a;}
+        .week-box select{padding:10px 14px;border-radius:12px;border:1px solid #FFD6E8;color:#FF5C99;background:#fff;font-size:15px;}
+        body.night .week-box select{background:#3d3d5c;color:#e0d8ff;border-color:#555;}
+        .science-tip{
+            margin-top:10px;padding:10px;border-radius:12px;
+            background:#fff0f7;font-size:13px;line-height:1.5;color:#FF70A6;
+        }
+        body.night .science-tip{background:#353552;color:#eee;}
+
+        .heart-center{
+            text-align:center;margin:30px 0;
+        }
+        .heart{
+            width:120px;height:120px;
+            fill:#FF70A6;
+            transition: transform 0.3s ease;
+        }
+        .heart.beat{
+            animation: heartbeat 0.6s ease-in-out;
+        }
+        @keyframes heartbeat {
+            0%{transform: scale(1);}
+            50%{transform: scale(1.3);}
+            100%{transform: scale(1);}
+        }
+
+        .count-show{
+            display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0;
+        }
+        .count-item{
+            background:#FFF5F9;padding:12px;border-radius:16px;text-align:center;
+        }
+        body.night .count-item{background:#2e2e4a;}
+        .count-label{font-size:13px;color:#FF70A6;}
+        .count-num{font-size:32px;font-weight:bold;color:#FF5C99;margin-top:4px;}
+
+        .big-btn{
+            width:100%;padding:26px;border:none;border-radius:24px;background:#FF70A6;
+            color:#fff;font-size:20px;font-weight:bold;margin:10px 0;
+        }
+        .big-btn:active{transform:scale(.96);}
+
+        .count-box{
+            background:linear-gradient(135deg,#FFF5F9,#FFEEF4);border-radius:22px;
+            padding:20px;text-align:center;margin:12px 0;
+        }
+        body.night .count-box{background:#353552;}
+        .time{font-size:14px;color:#FF99BB;margin-top:6px;}
+        body.night .time{color:#ccc;}
+        .state{margin-top:10px;padding:6px 14px;border-radius:20px;display:inline-block;font-size:14px;}
+        .good{background:#E8FFF3;color:#26CE8D;}
+        .warn{background:#FFF4E5;color:#FF9F43;}
+        .danger{background:#FFEAEA;color:#FF5555;}
+
+        .time-box{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0;}
+        .t-item{background:#FFF5F9;border-radius:16px;padding:10px;text-align:center;}
+        body.night .t-item{background:#2e2e4a;}
+        .t-title{font-size:12px;color:#FF8FB8;}
+        .t-num{font-size:22px;font-weight:bold;color:#FF5C99;margin-top:4px;}
+        .t-reset{font-size:11px;background:#FFD6E8;border:none;border-radius:12px;padding:3px 6px;margin-top:4px;}
+
+        .tools{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
+        .tool{background:#FFF5F9;border-radius:16px;padding:14px;text-align:center;}
+        body.night .tool{background:#2e2e4a;}
+        .tool button{width:100%;padding:8px;border:none;border-radius:12px;background:#FFD6E8;color:#FF5C99;margin-top:6px;}
+
+        .section{background:#FFF5F9;border-radius:18px;padding:16px;margin:12px 0;}
+        body.night .section{background:#2e2e4a;}
+        .s-title{font-size:14px;color:#FF70A6;margin-bottom:10px;font-weight:bold;}
+        input,textarea{width:100%;padding:10px;border:1px solid #FFD6E8;border-radius:12px;margin-bottom:8px;outline:none;}
+        body.night input,body.night textarea{background:#3d3d5c;color:#fff;border-color:#666;}
+        .save-btn{background:#FF70A6;color:#fff;border:none;border-radius:12px;padding:8px 12px;width:100%;}
+
+        .chart{background:#FFF5F9;border-radius:18px;padding:16px;margin:12px 0;}
+        body.night .chart{background:#2e2e4a;}
+        .chart-line{height:90px;display:flex;align-items:flex-end;gap:8px;margin-top:10px;}
+        .bar{flex:1;background:#FFC6E0;border-radius:4px 4px 0 0;transition:height 0.5s;}
+        body.night .bar{background:#bfa0d8;}
+
+        .history{max-height:120px;overflow-y:auto;padding:8px;}
+        .his-item{font-size:12px;color:#FF70A6;padding:6px;border-bottom:1px solid #FFE6F2;}
+        body.night .his-item{color:#ddd;border-color:#555;}
+    </style>
+</head>
+<body>
+
+<div class="sun"></div>
+<div class="moon"></div>
+<div class="cloud cloud1"></div>
+<div class="cloud cloud2"></div>
+
+<div class="baby-item b1">🍼</div>
+<div class="baby-item b2">👶</div>
+<div class="baby-item b3">🦶</div>
+<div class="baby-item b4">❤️</div>
+
+<div class="control-bar">
+    <button class="ctrl-btn" id="toggleMode">白天/黑夜</button>
+</div>
+
+<div class="box">
+    <div class="header">
+        <div class="title"><i class="fa-solid fa-rabbit"></i> 温馨胎动记录管家</div>
+        <div class="date" id="todayDate"></div>
+    </div>
+
+    <div class="tutor-box">
+        <strong>📖 正确数胎动</strong><br>
+        1. 连续动只算1次有效胎动<br>
+        2. 间隔≥2分钟再动算新一次<br>
+        3. 动一下点击一次按钮
+    </div>
+
+    <div class="week-box">
+        <label>当前孕周：</label>
+        <select id="weekSelect">
+            <option value="20">20周</option>
+            <option value="24">24周</option>
+            <option value="28" selected>28周</option>
+            <option value="32">32周</option>
+            <option value="36">36周</option>
+            <option value="40">40周</option>
+        </select>
+        <div class="science-tip" id="scienceTip">加载孕期科普中...</div>
+    </div>
+
+    <div class="heart-center">
+        <svg class="heart" id="heart" viewBox="0 0 24 24">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+    </div>
+
+    <div class="count-show">
+        <div class="count-item">
+            <div class="count-label">点击次数</div>
+            <div class="count-num" id="tapCount">0</div>
+        </div>
+        <div class="count-item">
+            <div class="count-label">有效胎动</div>
+            <div class="count-num" id="realCount">0</div>
+        </div>
+    </div>
+
+    <button class="big-btn" id="addBtn">👶 宝宝动啦！</button>
+
+    <div class="count-box">
+        <div class="time" id="timeText">点击开始记录</div>
+        <div class="state good" id="state">等待记录</div>
+    </div>
+
+    <div class="time-box">
+        <div class="t-item">
+            <div class="t-title">早上</div>
+            <div class="t-num" id="morning">0</div>
+            <button class="t-reset" onclick="resetM()">重置</button>
+        </div>
+        <div class="t-item">
+            <div class="t-title">中午</div>
+            <div class="t-num" id="noon">0</div>
+            <button class="t-reset" onclick="resetN()">重置</button>
+        </div>
+        <div class="t-item">
+            <div class="t-title">晚上</div>
+            <div class="t-num" id="evening">0</div>
+            <button class="t-reset" onclick="resetE()">重置</button>
+        </div>
+    </div>
+
+    <div class="tools">
+        <div class="tool">
+            <div>小时重置</div>
+            <button onclick="resetHour()">重置本小时</button>
+        </div>
+        <div class="tool">
+            <div>今日重置</div>
+            <button onclick="resetAll()">重置今日全部</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="s-title"><i class="fa-solid fa-bell"></i> 胎动提醒</div>
+        <input type="time" id="alarmTime">
+        <button class="save-btn" onclick="setAlarm()">设置提醒</button>
+    </div>
+
+    <div class="section">
+        <div class="s-title"><i class="fa-solid fa-book"></i> 今日备注</div>
+        <textarea rows="2" id="note" placeholder="记录心情、感受…"></textarea>
+        <button class="save-btn" onclick="saveNote()">保存备注</button>
+    </div>
+
+    <div class="chart">
+        <div class="s-title">今日胎动曲线</div>
+        <div class="chart-line" id="chart"></div>
+    </div>
+
+    <div class="section">
+        <div class="s-title">记录历史</div>
+        <div class="history" id="history"></div>
+    </div>
+</div>
+
+<script>
+    // 昼夜切换
+    const sun = document.querySelector('.sun');
+    const moon = document.querySelector('.moon');
+    const clouds = document.querySelectorAll('.cloud');
+    let isNight = false;
+
+    document.getElementById('toggleMode').onclick = function(){
+        isNight = !isNight;
+        if(isNight){
+            document.body.classList.add('night');
+            sun.style.display='none'; moon.style.display='block';
+            clouds.forEach(c=>c.style.display='none');
+        }else{
+            document.body.classList.remove('night');
+            sun.style.display='block'; moon.style.display='none';
+            clouds.forEach(c=>c.style.display='block');
+        }
+    };
+
+    // 星星
+    function createStars(){
+        for(let i=0;i<40;i++){
+            let s=document.createElement('div');
+            s.className='star'; s.textContent='✦';
+            s.style.left=Math.random()*100+'vw';
+            s.style.top=Math.random()*100+'vh';
+            document.body.appendChild(s);
+        }
+    }
+
+    // 孕周科普
+    const scienceData = {
+        20:"🍎 20周：多吃高铁高钙食物；胎儿感官发育；多听柔和音乐。",
+        24:"🥗 24周：控糖控油；胎儿听力形成；多和宝宝说话交流。",
+        28:"🍼 28周：补充DHA；开始正规数胎动；1小时≥3次正常。",
+        32:"🥛 32周：防便秘；胎位渐固定；多休息，左侧卧位。",
+        36:"🍚 36周：少食多餐；每周产检；准备待产包。",
+        40:"🎁 40周：静待分娩；注意临产信号，随时入院。"
+    };
+
+    // 核心计数
+    const week = ['日','一','二','三','四','五','六'];
+    const d = new Date();
+    const todayKey = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+    
+    document.getElementById('todayDate').innerHTML =
+        d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日 星期'+week[d.getDay()];
+
+    let tapCount = 0;
+    let realCount = 0;
+    let lastMoveTime = 0;
+    let startTime = null;
+    let timer = null;
+    let m=0,n=0,e=0;
+
+    const tapEl = document.getElementById('tapCount');
+    const realEl = document.getElementById('realCount');
+    const timeEl = document.getElementById('timeText');
+    const stateEl = document.getElementById('state');
+    const weekSelect = document.getElementById('weekSelect');
+    const scienceTip = document.getElementById('scienceTip');
+    const heart = document.getElementById('heart');
+
+    // 孕周切换
+    weekSelect.onchange = () => {
+        scienceTip.innerText = scienceData[weekSelect.value];
+    };
+
+    // 本地存储 —— 保存数据
+    function saveData(){
+        localStorage.setItem('fetal_'+todayKey, JSON.stringify({
+            tapCount, realCount, m,n,e, lastMoveTime
+        }));
+        updateChart();
+    }
+
+    // 本地存储 —— 加载数据
+    function loadData(){
+        let data = localStorage.getItem('fetal_'+todayKey);
+        if(data){
+            let obj = JSON.parse(data);
+            tapCount = obj.tapCount || 0;
+            realCount = obj.realCount || 0;
+            m = obj.m || 0;
+            n = obj.n || 0;
+            e = obj.e || 0;
+            lastMoveTime = obj.lastMoveTime || 0;
+
+            tapEl.innerText = tapCount;
+            realEl.innerText = realCount;
+            document.getElementById('morning').innerText = m;
+            document.getElementById('noon').innerText = n;
+            document.getElementById('evening').innerText = e;
+            updateState();
+        }
+    }
+
+    // 点击胎动 + 爱心跳动
+    document.getElementById('addBtn').onclick = () => {
+        heart.classList.add('beat');
+        setTimeout(()=>heart.classList.remove('beat'),600);
+
+        if(!startTime) startTime = Date.now();
+        startTimer();
+
+        tapCount++;
+        tapEl.innerText = tapCount;
+
+        const now = Date.now();
+        if(!lastMoveTime || now - lastMoveTime > 2*60*1000){
+            realCount++;
+            realEl.innerText = realCount;
+            saveToTime();
+        }
+        lastMoveTime = now;
+
+        updateState();
+        updateChart();
+        addHistory("宝宝动了");
+        saveData();
+    };
+
+    // 计时
+    function startTimer(){
+        clearInterval(timer);
+        timer = setInterval(()=>{
+            let diff = Date.now() - startTime;
+            let min = Math.floor(diff/60000);
+            let sec = Math.floor((diff%60000)/1000);
+            timeEl.innerText = `已计时 ${min}分${sec}秒`;
+        },1000);
+    }
+
+    // 状态
+    function updateState(){
+        if(realCount < 3){
+            stateEl.className = "state warn";
+            stateEl.innerText = "胎动偏少，建议继续观察";
+        }else if(realCount > 30){
+            stateEl.className = "state danger";
+            stateEl.innerText = "胎动过频，请警惕";
+        }else{
+            stateEl.className = "state good";
+            stateEl.innerText = "胎动正常，宝宝状态良好";
+        }
+    }
+
+    // 早中晚统计
+    function saveToTime(){
+        let h = new Date().getHours();
+        if(h>=6&&h<12) m=Math.max(m,realCount);
+        else if(h>=12&&h<18) n=Math.max(n,realCount);
+        else e=Math.max(e,realCount);
+        document.getElementById('morning').innerText=m;
+        document.getElementById('noon').innerText=n;
+        document.getElementById('evening').innerText=e;
+    }
+
+    // 重置功能
+    function resetHour(){
+        tapCount=0; realCount=0; lastMoveTime=0;
+        tapEl.innerText=0; realEl.innerText=0;
+        startTime=null; clearInterval(timer);
+        timeEl.innerText="点击开始记录";
+        stateEl.className="state good"; stateEl.innerText="等待记录";
+        saveData();
+    }
+    function resetM(){m=0;document.getElementById('morning').innerText=0;saveData();}
+    function resetN(){n=0;document.getElementById('noon').innerText=0;saveData();}
+    function resetE(){e=0;document.getElementById('evening').innerText=0;saveData();}
+    function resetAll(){
+        resetHour();
+        m=n=e=0;
+        document.getElementById('morning').innerText=0;
+        document.getElementById('noon').innerText=0;
+        document.getElementById('evening').innerText=0;
+        saveData();
+    }
+
+    // 提醒
+    function setAlarm(){
+        let v=document.getElementById('alarmTime').value;if(!v)return;
+        let [hh,mm]=v.split(':');
+        let tar=new Date();tar.setHours(hh,mm,0);
+        if(tar<Date.now()) tar.setDate(tar.getDate()+1);
+        setTimeout(()=>alert("🍅 该记录胎动啦～"),tar-Date.now());
+        addHistory("设置提醒："+v);
+    }
+    // 备注
+    function saveNote(){
+        let v=document.getElementById('note').value;if(!v)return;
+        addHistory("备注："+v);
+        localStorage.setItem('note_'+todayKey, v);
+        alert("保存成功");
+    }
+    // 历史记录
+    function addHistory(text){
+        let h=document.getElementById('history');
+        let item=document.createElement('div');
+        item.className="his-item";
+        item.innerText=new Date().toLocaleTimeString()+" "+text;
+        h.prepend(item);
+    }
+    // 图表
+    function updateChart(){
+        let ch=document.getElementById('chart');ch.innerHTML='';
+        [m,n,e].forEach(v=>{
+            let b=document.createElement('div');b.className='bar';
+            b.style.height=Math.min(v*6,90)+'px';
+            ch.appendChild(b);
+        });
+    }
+
+    // 初始化
+    window.onload = () => {
+        createStars();
+        weekSelect.onchange();
+        loadData();
+        updateChart();
+        
+        let note = localStorage.getItem('note_'+todayKey);
+        if(note) document.getElementById('note').value = note;
+    };
+</script>
+</body>
+</html>
